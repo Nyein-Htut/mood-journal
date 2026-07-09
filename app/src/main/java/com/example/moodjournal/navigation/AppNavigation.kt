@@ -22,6 +22,8 @@ import com.example.moodjournal.util.CrisisSupport
 import com.example.moodjournal.viewmodel.JournalViewModel
 import com.example.moodjournal.ui.theme.*
 
+private const val ROUTE_JAR_HISTORY = "jar_history"
+private const val ROUTE_JAR_DETAIL = "jar_detail/{jarNumber}"
 private const val ROUTE_LOGIN = "login"
 private const val ROUTE_SIGNUP = "signup"
 private const val ROUTE_LIST = "list"
