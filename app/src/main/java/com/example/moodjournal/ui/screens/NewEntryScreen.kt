@@ -246,7 +246,7 @@ private fun CustomizeChip(
 
 // Small local helpers to keep imports tidy without pulling in extra foundation imports above
 private fun Modifier.clickableChip(onClick: () -> Unit): Modifier =
-    this.then(androidx.compose.foundation.clickable(onClick = onClick))
+    this.then(Modifier.clickable(onClick = onClick))
 
 private fun Modifier.clickableRemove(onClick: () -> Unit): Modifier =
-    this.then(androidx.compose.foundation.clickable(onClick = onClick))
+    this.then(Modifier.clickable(onClick = onClick))
