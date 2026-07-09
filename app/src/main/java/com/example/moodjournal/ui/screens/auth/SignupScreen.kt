@@ -22,12 +22,16 @@ import com.example.moodjournal.ui.theme.*
 fun SignupScreen(
     onSignupSuccess: (String, String) -> Unit,
     onBack: () -> Unit,
-    isDarkMode: Boolean
+    isDarkMode: Boolean,
+    errorMessage: String? = null,
+    isLoading: Boolean = false
 ) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val usernameState = remember { mutableStateOf("") }
+    val passwordState = remember { mutableStateOf("") }
+    val confirmPasswordState = remember { mutableStateOf("") }
+    val localErrorState = remember { mutableStateOf<String?>(null) }
+
+    val shownError = errorMessage ?: localErrorState.value
 
     val backgroundBrush = if (isDarkMode) DarkPageGradient else LightPageGradient
     val textPrimary = if (isDarkMode) DarkText1 else LightText1
@@ -73,8 +77,8 @@ fun SignupScreen(
             Spacer(Modifier.height(32.dp))
 
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
+                value = usernameState.value,
+                onValueChange = { usernameState.value = it; localErrorState.value = null },
                 label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -88,8 +92,8 @@ fun SignupScreen(
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = passwordState.value,
+                onValueChange = { passwordState.value = it; localErrorState.value = null },
                 label = { Text("Password (min 6 chars)") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
@@ -104,8 +108,8 @@ fun SignupScreen(
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                value = confirmPasswordState.value,
+                onValueChange = { confirmPasswordState.value = it; localErrorState.value = null },
                 label = { Text("Confirm Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
@@ -117,9 +121,9 @@ fun SignupScreen(
                 )
             )
 
-            if (errorMessage != null) {
+            if (shownError != null) {
                 Text(
-                    errorMessage!!,
+                    shownError,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 8.dp)
@@ -130,21 +134,29 @@ fun SignupScreen(
 
             Button(
                 onClick = {
-                    if (username.isBlank()) {
-                        errorMessage = "Please enter a username"
-                    } else if (password != confirmPassword) {
-                        errorMessage = "Passwords do not match"
-                    } else if (password.length < 6) {
-                        errorMessage = "Password must be at least 6 characters"
-                    } else {
-                        onSignupSuccess(username.trim(), password)
+                    val username = usernameState.value
+                    val password = passwordState.value
+                    val confirmPassword = confirmPasswordState.value
+                    when {
+                        username.isBlank() -> localErrorState.value = "Please enter a username"
+                        password != confirmPassword -> localErrorState.value = "Passwords do not match"
+                        password.length < 6 -> localErrorState.value = "Password must be at least 6 characters"
+                        else -> {
+                            localErrorState.value = null
+                            onSignupSuccess(username.trim(), password)
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = if (isDarkMode) DarkCoral else LightCoralDeep)
+                colors = ButtonDefaults.buttonColors(containerColor = if (isDarkMode) DarkCoral else LightCoralDeep),
+                enabled = !isLoading
             ) {
-                Text("Create Account", fontWeight = FontWeight.Bold, color = Color.White)
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
+                } else {
+                    Text("Create Account", fontWeight = FontWeight.Bold, color = Color.White)
+                }
             }
         }
     }
