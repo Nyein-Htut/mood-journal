@@ -26,33 +26,37 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.example.moodjournal.data.JournalEntry
 import com.example.moodjournal.ui.theme.*
+import com.example.moodjournal.util.JAR_CAPACITY
 import kotlin.math.sin
 
 /** A fractional (0..1) position within the jar's visual bounds. */
 private data class BubbleSpot(val xFrac: Float, val yFrac: Float)
 
-/** Simple deterministic pseudo-random in [-1, 1], seeded by an int - keeps layout stable across recompositions. */
 private fun pseudoRandom(seed: Int): Float {
     val v = sin(seed * 12.9898f) * 43758.5453f
     return (v - kotlin.math.floor(v)) * 2f - 1f
 }
 
+/**
+ * Lays bubbles out in a tight, safely-inset grid so they never cross the glass
+ * walls, including the rounded corners near the jar's neck.
+ */
 private fun computeBubbleLayout(count: Int): List<BubbleSpot> {
-    val cols = 5
-    val xMin = 0.28f
-    val xMax = 0.72f
+    val cols = 4
+    val xMin = 0.32f
+    val xMax = 0.68f
     val xStep = (xMax - xMin) / (cols - 1).coerceAtLeast(1)
-    val yBottom = 0.80f
-    val rowHeight = 0.12f
+    val yBottom = 0.76f
+    val rowHeight = 0.15f
 
     return (0 until count).map { i ->
         val row = i / cols
         val col = i % cols
         val stagger = if (row % 2 == 1) xStep / 2f else 0f
-        val jitterX = pseudoRandom(i * 7 + 3) * xStep * 0.2f
-        val jitterY = pseudoRandom(i * 13 + 11) * rowHeight * 0.15f
-        val x = (xMin + col * xStep + stagger + jitterX).coerceIn(0.22f, 0.78f)
-        val y = (yBottom - row * rowHeight + jitterY).coerceIn(0.35f, 0.82f)
+        val jitterX = pseudoRandom(i * 7 + 3) * xStep * 0.15f
+        val jitterY = pseudoRandom(i * 13 + 11) * rowHeight * 0.12f
+        val x = (xMin + col * xStep + stagger + jitterX).coerceIn(0.28f, 0.72f)
+        val y = (yBottom - row * rowHeight + jitterY).coerceIn(0.40f, 0.80f)
         BubbleSpot(x, y)
     }
 }
@@ -78,13 +82,13 @@ fun MoodJar(
             drawGlassJar(this, glassFillColor, glassBorderColor)
         }
 
-        val recent = remember(entries) {
-            entries.filter { it.moodScore != null }.sortedBy { it.timestamp }.takeLast(25)
+        val current = remember(entries) {
+            entries.filter { it.moodScore != null }.sortedBy { it.timestamp }.takeLast(JAR_CAPACITY)
         }
-        val layout = remember(recent.size) { computeBubbleLayout(recent.size) }
-        val bubbleSize = (widthDp / 7f)
+        val layout = remember(current.size) { computeBubbleLayout(current.size) }
+        val bubbleSize = (widthDp / 8.5f)
 
-        recent.forEachIndexed { index, entry ->
+        current.forEachIndexed { index, entry ->
             val bucket = moodBucketFor(entry.moodScore) ?: return@forEachIndexed
             val spot = layout.getOrNull(index) ?: return@forEachIndexed
 
@@ -100,14 +104,14 @@ fun MoodJar(
             )
 
             val xDp = widthDp * spot.xFrac - bubbleSize / 2
-            val yDp = heightDp * spot.yFrac - bubbleSize / 2 + (bob * 3).dp
+            val yDp = heightDp * spot.yFrac - bubbleSize / 2 + (bob * 2.5f).dp
 
             MoodBubble(
                 bucket = bucket,
                 modifier = Modifier
                     .size(bubbleSize)
                     .offset(x = xDp, y = yDp)
-                    .shadow(elevation = 1.dp, shape = CircleShape)
+                    .shadow(elevation = 2.dp, shape = CircleShape)
                     .clickable { onBubbleClick(entry) }
             )
         }
@@ -122,23 +126,36 @@ private fun MoodBubble(bucket: MoodBucket, modifier: Modifier = Modifier) {
             .background(
                 Brush.radialGradient(
                     colors = listOf(
-                        bucket.color.copy(alpha = 0.9f),
-                        bucket.color.copy(alpha = 0.7f)
-                    )
+                        bucket.color.copy(alpha = 0.95f),
+                        bucket.color.copy(alpha = 0.75f)
+                    ),
+                    center = Offset(0.35f, 0.3f),
+                    radius = 1.4f
                 )
             )
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)), CircleShape)
+            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)), CircleShape)
     ) {
         drawFace(this, bucket)
-        
-        // Soft gloss
+
+        // Bright glossy highlight, top-left, for a wet-glass look.
         drawCircle(
-            brush = Brush.verticalGradient(
-                0.0f to Color.White.copy(alpha = 0.4f),
-                0.4f to Color.Transparent
+            brush = Brush.radialGradient(
+                0.0f to Color.White.copy(alpha = 0.55f),
+                0.5f to Color.White.copy(alpha = 0.1f),
+                1.0f to Color.Transparent
             ),
-            radius = size.width / 2.2f,
-            center = Offset(size.width * 0.35f, size.height * 0.35f)
+            radius = size.width / 3.2f,
+            center = Offset(size.width * 0.32f, size.height * 0.3f)
+        )
+
+        // Faint rim shadow at the bottom for a rounder, more 3D feel.
+        drawCircle(
+            brush = Brush.radialGradient(
+                0.75f to Color.Transparent,
+                1.0f to Color.Black.copy(alpha = 0.12f)
+            ),
+            radius = size.width / 2f,
+            center = Offset(size.width * 0.5f, size.height * 0.5f)
         )
     }
 }
@@ -151,13 +168,12 @@ private fun drawFace(scope: DrawScope, bucket: MoodBucket) {
     val eyeRadius = w * 0.05f
     val eyeColor = Color(0xFF2C2C2C).copy(alpha = 0.8f)
 
-    // Eyes
     scope.drawCircle(eyeColor, radius = eyeRadius, center = Offset(w / 2 - eyeOffsetX, eyeY))
     scope.drawCircle(eyeColor, radius = eyeRadius, center = Offset(w / 2 + eyeOffsetX, eyeY))
 
     val mouthCenter = Offset(w / 2, h * 0.65f)
     val mouthWidth = w * 0.35f
-    
+
     val mouthPath = Path().apply {
         when (bucket) {
             MoodBucket.GREAT -> {
@@ -190,7 +206,6 @@ private fun drawGlassJar(scope: DrawScope, fillColor: Color, borderColor: Color)
         val w = size.width
         val h = size.height
 
-        // Jar shape parameters
         val jarTop = h * 0.15f
         val jarBottom = h * 0.90f
         val jarLeft = w * 0.12f
@@ -210,27 +225,15 @@ private fun drawGlassJar(scope: DrawScope, fillColor: Color, borderColor: Color)
             close()
         }
 
-        // Shadow at the bottom
         drawOval(
             color = Color.Black.copy(alpha = 0.08f),
             topLeft = Offset(w * 0.20f, jarBottom - 2.dp.toPx()),
             size = Size(w * 0.6f, 10.dp.toPx())
         )
 
-        // Glass body fill
-        drawPath(
-            jarPath,
-            color = fillColor
-        )
-        
-        // Glass body border
-        drawPath(
-            jarPath,
-            color = borderColor,
-            style = Stroke(width = 2.dp.toPx())
-        )
+        drawPath(jarPath, color = fillColor)
+        drawPath(jarPath, color = borderColor, style = Stroke(width = 2.dp.toPx()))
 
-        // Jar "neck" and "rim"
         val rimWidth = w * 0.5f
         val rimLeft = (w - rimWidth) / 2f
         drawRect(
@@ -240,12 +243,11 @@ private fun drawGlassJar(scope: DrawScope, fillColor: Color, borderColor: Color)
             style = Stroke(width = 1.dp.toPx())
         )
 
-        // Cork Lid
         val lidWidth = w * 0.15f
         val lidHeight = h * 0.08f
         val lidX = (w - lidWidth) / 2f
         val lidY = jarTop - lidHeight + 5.dp.toPx()
-        
+
         val lidPath = Path().apply {
             moveTo(lidX, lidY)
             lineTo(lidX + lidWidth, lidY)
@@ -253,13 +255,8 @@ private fun drawGlassJar(scope: DrawScope, fillColor: Color, borderColor: Color)
             lineTo(lidX - 4.dp.toPx(), lidY - 10.dp.toPx())
             close()
         }
-        
-        drawPath(
-            lidPath,
-            color = Color(0xFF8B76E8) // Using Lav Deep as in HTML for lid color
-        )
-        
-        // Side reflection on glass
+        drawPath(lidPath, color = Color(0xFF8B76E8))
+
         drawRect(
             color = Color.White.copy(alpha = 0.3f),
             topLeft = Offset(jarLeft + 10.dp.toPx(), jarTop + 20.dp.toPx()),
