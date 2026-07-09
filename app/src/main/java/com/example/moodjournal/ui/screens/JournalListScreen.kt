@@ -1,5 +1,9 @@
 package com.example.moodjournal.ui.screens
 
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.example.moodjournal.util.JAR_CAPACITY
+import com.example.moodjournal.util.currentJarEntries
+import com.example.moodjournal.util.currentJarNumber
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -48,7 +52,8 @@ fun JournalListScreen(
     onEntryClick: (JournalEntry) -> Unit,
     onTrendsClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: JournalViewModel // Added to handle theme toggle
+    onJarHistoryClick: () -> Unit,
+    viewModel: JournalViewModel
 ) {
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     val sheetState = rememberModalBottomSheetState()
@@ -62,12 +67,12 @@ fun JournalListScreen(
         containerColor = Color.Transparent
     ) { padding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(backgroundBrush)
-                .padding(padding)
-                .statusBarsPadding()
-        ) {
+    modifier = Modifier
+        .fillMaxSize()
+        .background(backgroundBrush)
+        .padding(padding)
+        .statusBarsPadding()
+) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 80.dp)
@@ -85,7 +90,7 @@ fun JournalListScreen(
                 }
 
                 item {
-                    MoodJarSection(entries, isDarkMode, onEntryClick, onTrendsClick)
+                    MoodJarSection(entries, isDarkMode, onEntryClick, onTrendsClick, onJarHistoryClick)
                 }
 
                 item {
@@ -285,12 +290,17 @@ private fun MoodJarSection(
     entries: List<JournalEntry>,
     isDarkMode: Boolean,
     onEntryClick: (JournalEntry) -> Unit,
-    onTrendsClick: () -> Unit
+    onTrendsClick: () -> Unit,
+    onJarHistoryClick: () -> Unit
 ) {
     val cardBg = if (isDarkMode) DarkCardBg else LightCardBg
     val cardBorder = if (isDarkMode) DarkCardBorder else LightCardBorder
     val textPrimary = if (isDarkMode) DarkText1 else LightText1
     val textSecondary = if (isDarkMode) DarkText2 else LightText2
+    val accent = if (isDarkMode) DarkCoral else LightCoralDeep
+
+    val jarEntries = remember(entries) { currentJarEntries(entries) }
+    val jarNumber = remember(entries) { currentJarNumber(entries) }
 
     Card(
         modifier = Modifier
@@ -306,16 +316,27 @@ private fun MoodJarSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    "Your mood jar",
-                    fontWeight = FontWeight.Bold,
-                    color = textPrimary,
-                    fontSize = 16.sp
-                )
+                Column {
+                    Text(
+                        "Your mood jar",
+                        fontWeight = FontWeight.Bold,
+                        color = textPrimary,
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        "Jar #$jarNumber · ${jarEntries.size}/$JAR_CAPACITY",
+                        fontSize = 12.sp,
+                        color = textSecondary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                TextButton(onClick = onJarHistoryClick) {
+                    Text("View old jars →", color = accent, fontSize = 12.5.sp, fontWeight = FontWeight.Bold)
+                }
             }
-            
+
             MoodJar(
-                entries = entries,
+                entries = jarEntries,
                 onBubbleClick = onEntryClick,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -324,7 +345,6 @@ private fun MoodJarSection(
         }
     }
 }
-
 @Composable
 private fun StatsSection(entries: List<JournalEntry>, isDarkMode: Boolean) {
     val stability = remember(entries) { calculateMoodStability(entries) }
