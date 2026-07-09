@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/moodjournal/MainActivity.kt
 package com.example.moodjournal
 
 import android.os.Bundle
@@ -9,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.view.WindowCompat
 import com.example.moodjournal.navigation.AppNavigation
 import com.example.moodjournal.ui.theme.MoodJournalTheme
 import com.example.moodjournal.viewmodel.JournalViewModel
@@ -19,6 +21,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val isDarkMode by viewModel.isDarkMode.collectAsState()
             MoodJournalTheme(darkTheme = isDarkMode) {
