@@ -162,6 +162,7 @@ fun AppNavigation(viewModel: JournalViewModel) {
                 )
             }
 
+            // update the ROUTE_LIST composable call:
             composable(ROUTE_LIST) {
                 JournalListScreen(
                     entries = entries,
@@ -169,7 +170,30 @@ fun AppNavigation(viewModel: JournalViewModel) {
                     onEntryClick = { entry -> navController.navigate("entry/${entry.id}") },
                     onTrendsClick = { navController.navigate(ROUTE_TRENDS) },
                     onSettingsClick = { navController.navigate(ROUTE_SETTINGS) },
+                    onJarHistoryClick = { navController.navigate(ROUTE_JAR_HISTORY) },
                     viewModel = viewModel
+                )
+            }
+            
+            // add two new composable blocks anywhere alongside the others:
+            composable(ROUTE_JAR_HISTORY) {
+                JarHistoryScreen(
+                    entries = entries,
+                    onBack = { navController.popBackStack() },
+                    onJarClick = { jarNumber -> navController.navigate("jar_detail/$jarNumber") }
+                )
+            }
+            
+            composable(
+                ROUTE_JAR_DETAIL,
+                arguments = listOf(navArgument("jarNumber") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val jarNumber = backStackEntry.arguments?.getInt("jarNumber") ?: 1
+                JarDetailScreen(
+                    jarNumber = jarNumber,
+                    entries = entries,
+                    onBack = { navController.popBackStack() },
+                    onEntryClick = { entry -> navController.navigate("entry/${entry.id}") }
                 )
             }
 
