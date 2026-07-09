@@ -1,6 +1,6 @@
 // app/src/main/java/com/example/moodjournal/navigation/AppNavigation.kt
 package com.example.moodjournal.navigation
-
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -61,9 +61,9 @@ fun AppNavigation(viewModel: JournalViewModel) {
             }
         )
     }
-
-    Scaffold(
+    caffold(
         containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (currentDestination?.route in listOf(ROUTE_LIST, ROUTE_TRENDS, ROUTE_INSIGHTS)) {
                 NavigationBar(
