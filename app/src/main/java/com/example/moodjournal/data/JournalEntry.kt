@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/moodjournal/data/JournalEntry.kt
 package com.example.moodjournal.data
 
 import androidx.room.Entity
@@ -10,10 +11,12 @@ data class JournalEntry(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val text: String,
     val timestamp: Long,
-    val moodScore: Int? = null,          // -5 (very low) .. 5 (very positive)
+    val moodScore: Int? = null,
     val primaryEmotion: String? = null,
-    val themes: String? = null,          // comma-separated theme tags
-    val reflection: String? = null,      // short supportive, non-clinical note from the model
-    val concernFlag: Boolean = false,    // true if language suggested acute distress
-    val status: AnalysisStatus = AnalysisStatus.PENDING
+    val themes: String? = null,
+    val reflection: String? = null,
+    val concernFlag: Boolean = false,
+    val status: AnalysisStatus = AnalysisStatus.PENDING,
+    val backgroundId: String? = null,   // selected cute background swatch
+    val stickers: String? = null        // comma-separated emoji, e.g. "🌸,✨"
 )
