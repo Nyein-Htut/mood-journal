@@ -71,7 +71,6 @@ fun JournalListScreen(
         .fillMaxSize()
         .background(backgroundBrush)
         .padding(padding)
-        .statusBarsPadding()
 ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
