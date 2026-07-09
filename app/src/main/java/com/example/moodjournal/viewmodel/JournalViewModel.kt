@@ -201,19 +201,23 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /** Saves the entry immediately, then kicks off analysis in the background. */
-    fun addEntry(text: String) {
+   fun addEntry(text: String, backgroundId: String? = null, stickers: List<String> = emptyList()) {
         if (text.isBlank()) return
-
-        // Instant local safety check, independent of network availability.
+    
         if (CrisisSupport.containsConcerningLanguage(text)) {
             _showCrisisSupport.value = true
         }
 
-        viewModelScope.launch {
-            val entry = JournalEntry(text = text, timestamp = System.currentTimeMillis())
-            val id = dao.insert(entry)
-            analyzeEntry(id, text)
-        }
+            viewModelScope.launch {
+                val entry = JournalEntry(
+                    text = text,
+                    timestamp = System.currentTimeMillis(),
+                    backgroundId = backgroundId,
+                    stickers = if (stickers.isEmpty()) null else stickers.joinToString(",")
+                )
+                val id = dao.insert(entry)
+                analyzeEntry(id, text)
+            }
     }
 
     fun retryAnalysis(entry: JournalEntry) {
