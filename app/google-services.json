@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269319209644",
+    "project_id": "mood-journal-c52b2",
+    "storage_bucket": "mood-journal-c52b2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269319209644:android:d1802451b06ead55f0d509",
+        "android_client_info": {
+          "package_name": "com.irene.moodjournal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoPBQpOqEuS219vpoxHcnnhQQV5_VpGXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

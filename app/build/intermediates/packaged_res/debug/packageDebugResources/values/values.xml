@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#2E3B55</color>
+    <string name="app_name">Mood Journal by Irene</string>
+    <string name="gcm_defaultSenderId" translatable="false">269319209644</string>
+    <string name="google_api_key" translatable="false">AIzaSyCoPBQpOqEuS219vpoxHcnnhQQV5_VpGXY</string>
+    <string name="google_app_id" translatable="false">1:269319209644:android:d1802451b06ead55f0d509</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCoPBQpOqEuS219vpoxHcnnhQQV5_VpGXY</string>
+    <string name="google_storage_bucket" translatable="false">mood-journal-c52b2.firebasestorage.app</string>
+    <string name="project_id" translatable="false">mood-journal-c52b2</string>
+</resources>
