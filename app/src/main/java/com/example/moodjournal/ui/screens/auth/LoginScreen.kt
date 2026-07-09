@@ -33,14 +33,16 @@ fun LoginScreen(
 
     Scaffold(containerColor = Color.Transparent) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(backgroundBrush)
-                .padding(padding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+    modifier = Modifier
+        .fillMaxSize()
+        .background(backgroundBrush)
+        .padding(padding)
+        .imePadding()
+        .verticalScroll(rememberScrollState())
+        .padding(24.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center
+) {
             Text("🌸", fontSize = 64.sp)
             Spacer(Modifier.height(16.dp))
             Text(
