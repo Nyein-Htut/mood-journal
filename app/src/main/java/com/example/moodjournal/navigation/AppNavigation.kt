@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/moodjournal/navigation/AppNavigation.kt
 package com.example.moodjournal.navigation
 
 import androidx.compose.foundation.layout.padding
@@ -137,9 +138,12 @@ fun AppNavigation(viewModel: JournalViewModel) {
 
             composable(ROUTE_SIGNUP) {
                 var error by remember { mutableStateOf<String?>(null) }
+                var loading by remember { mutableStateOf(false) }
                 SignupScreen(
                     onSignupSuccess = { u, p ->
+                        loading = true
                         viewModel.signup(u, p) { result ->
+                            loading = false
                             if (result.isSuccess) {
                                 navController.navigate(ROUTE_LIST) {
                                     popUpTo(ROUTE_LOGIN) { inclusive = true }
@@ -150,7 +154,9 @@ fun AppNavigation(viewModel: JournalViewModel) {
                         }
                     },
                     onBack = { navController.popBackStack() },
-                    isDarkMode = isDarkMode
+                    isDarkMode = isDarkMode,
+                    errorMessage = error,
+                    isLoading = loading
                 )
             }
 
@@ -185,7 +191,7 @@ fun AppNavigation(viewModel: JournalViewModel) {
             composable(ROUTE_NEW) {
                 NewEntryScreen(
                     onBack = { navController.popBackStack() },
-                    onSave = { text -> viewModel.addEntry(text) }
+                    onSave = { text, backgroundId, stickers -> viewModel.addEntry(text, backgroundId, stickers) }
                 )
             }
 
@@ -200,7 +206,8 @@ fun AppNavigation(viewModel: JournalViewModel) {
                         entry = it,
                         onBack = { navController.popBackStack() },
                         onDelete = { viewModel.deleteEntry(it) },
-                        onRetry = { viewModel.retryAnalysis(it) }
+                        onRetry = { viewModel.retryAnalysis(it) },
+                        onEditSave = { newText -> viewModel.updateEntryText(it, newText) }
                     )
                 }
             }
