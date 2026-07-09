@@ -219,7 +219,28 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
     fun retryAnalysis(entry: JournalEntry) {
         viewModelScope.launch { analyzeEntry(entry.id, entry.text) }
     }
-
+    
+    fun updateEntryText(entry: JournalEntry, newText: String) {
+        if (newText.isBlank() || newText == entry.text) return
+    
+        if (CrisisSupport.containsConcerningLanguage(newText)) {
+            _showCrisisSupport.value = true
+        }
+    
+        viewModelScope.launch {
+            val updated = entry.copy(
+                text = newText,
+                status = AnalysisStatus.PENDING,
+                moodScore = null,
+                primaryEmotion = null,
+                themes = null,
+                reflection = null,
+                concernFlag = false
+            )
+            dao.update(updated)
+            analyzeEntry(updated.id, newText)
+        }
+    }
     private suspend fun analyzeEntry(id: Long, text: String) {
         val key = apiKey
         if (key.isNullOrBlank()) {
