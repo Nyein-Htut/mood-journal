@@ -1,6 +1,6 @@
 // app/src/main/java/com/example/moodjournal/ui/components/EntryCustomizeSheets.kt
 package com.example.moodjournal.ui.components
-
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
