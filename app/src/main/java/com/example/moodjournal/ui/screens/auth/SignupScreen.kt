@@ -52,13 +52,15 @@ fun SignupScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(backgroundBrush)
-                .padding(padding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    modifier = Modifier
+        .fillMaxSize()
+        .background(backgroundBrush)
+        .padding(padding)
+        .imePadding()
+        .verticalScroll(rememberScrollState())
+        .padding(24.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+)  {
             Text("✨", fontSize = 48.sp)
             Spacer(Modifier.height(16.dp))
             Text(
