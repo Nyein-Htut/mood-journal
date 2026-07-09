@@ -1,6 +1,11 @@
+// app/src/main/java/com/example/moodjournal/auth/AuthRepository.kt
 package com.example.moodjournal.auth
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
@@ -14,8 +19,12 @@ class AuthRepository {
             val email = "$username@moodjournal.app"
             auth.createUserWithEmailAndPassword(email, password).await()
             Result.success(Unit)
+        } catch (e: FirebaseAuthUserCollisionException) {
+            Result.failure(Exception("That username is already taken. Try logging in instead."))
+        } catch (e: FirebaseAuthWeakPasswordException) {
+            Result.failure(Exception("Please use a stronger password (at least 6 characters)."))
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Couldn't create your account. Please check your connection and try again."))
         }
     }
 
@@ -24,8 +33,12 @@ class AuthRepository {
             val email = "$username@moodjournal.app"
             auth.signInWithEmailAndPassword(email, password).await()
             Result.success(Unit)
+        } catch (e: FirebaseAuthInvalidUserException) {
+            Result.failure(Exception("Please sign up first to log in."))
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Result.failure(Exception("Incorrect username or password."))
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Couldn't log in right now. Please check your connection and try again."))
         }
     }
 
